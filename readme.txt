@@ -20,8 +20,11 @@ NOTE: The above assumes the ACTIVITY_DIR is organized as:
             |--POSTPROCESSED.csv
 
 running this will produce a new directory 'cleaned_data' in PATH/ACTIVITY_DIR/ contained pickled dataframes that are used in the analysis.
+
 For example after running
+
     > python vis1.py PATH/ACTIVITY_DIR/uncleaned_data
+
 The ACTIVITY_DIR should be structured as follows:
     |-- ACTIVITY_DIR
           |-- vis1.html
@@ -32,3 +35,5 @@ The ACTIVITY_DIR should be structured as follows:
               |--aws_b3_df.pkl
               | ...
               |--raw_slow_df.pkl
+              
+Future versions will re-run the post-processing algorithm and will only require a path to the json file instead of the path to a directory with both the json and csv
