@@ -58,4 +58,4 @@ RR_figs_dict = {
 figs.append(
     pl.create_subplots_w_raw(RR_figs_dict, raw_fig_dict, plottitle= "RRAvg (Top), Raw Chest (Bottom)", xtitle="Time [s]", ytitle1="VT", ytitle2="Raw Chest",
                              show=False))
-pl.figures_to_html(figs, filename=os.path.join(activity_data_dir, "VE-VT.html"), show=True)
+pl.figures_to_html(figs, filename=os.path.join(activity_data_dir, "vis1.html"), show=True)
