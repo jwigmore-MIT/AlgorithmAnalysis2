@@ -44,15 +44,18 @@ def plot_VT(df_dict, show=True):
     return fig
 
 
-def plot_df_columns(df_dict, plottitle="", xtitle="", ytitle="", show=False):
+def plot_df_columns(df_dict, plottitle="", xtitle="", ytitle="", show=False, renderer = None):
+    if renderer is not None:
+        pio.renderers.default = renderer
     fig = go.Figure()
     fig.update_layout(title=plottitle)
     fig.update_xaxes(title_text=xtitle)
     fig.update_yaxes(title_text=ytitle)
 
     for name, (df, xcol, ycol) in df_dict.items():
+        y_val = df.index if ycol == "index" else df[ycol]
         fig = fig.add_trace(go.Scatter(
-            x=df[xcol],
+            x=df.index if xcol == "index" else df[xcol],
             y=df[ycol],
             name=name
         ))

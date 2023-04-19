@@ -1,12 +1,15 @@
 import os
 
 import pandas as pd
-
+import numpy as np
 pd.options.plotting.backend = "plotly"
+from plotly.subplots import make_subplots
+import plotly.graph_objects as go
+
 import data_importing as imp  # Custom importing module
 import plotting as pl  # Custom plotting module
 import interfaces.postprocessing as pif  # post processing interface
-
+import scipy.signal
 import warnings
 
 warnings.simplefilter(action='ignore', category=FutureWarning)
@@ -47,23 +50,89 @@ if __name__ == '__main__':
     # Post Processing Data from BR_rVE_RTformat
     chest_raw, chest_5hz, chest_bs, chest_bs_smooth, time, X_bbyb_df = pif.BR_rVE_RTformat_wrapper(uncleaned_data_dir)
 
-    # raw_fig_dict = {
-    #     "Raw Chest": (raw_slow_df, "time", "c")
-    # }
+    def cross_correlate(series1, series2):
+        sig1 = series1.dropna()
+        sig2 = series2.dropna()
+        corr = scipy.signal.correlate(sig1, sig2)
+        lags = scipy.signal.correlation_lags(len(sig1), len(sig2))
+
+        return corr/corr.max(), lags
+
+    def plot_cross_corr(series1, series2, corr, lags, title = "", show = False):
+        fig = make_subplots(rows = 2, cols = 1)
+        fig.update_layout(title = title)
+        fig = fig.add_trace(go.Scatter(
+            x = series1.index,
+            y = series1.values,
+            name = "Series1"
+        ), row = 1, col = 1)
+        fig = fig.add_trace(go.Scatter(
+            x=series2.index,
+            y=series2.values,
+            name = "Series2"
+        ), row=1, col=1)
+        fig.add_trace(go.Scatter(
+            x = lags,
+            y = corr,
+            name = "Cross-Correlation"
+        ), row = 2, col =1)
+        if show:
+            fig.show()
+        return fig
+    def interp_series(series, start = 0, end = None):
+        '''
+        Second based interpolation
+        :param series:
+        :param start:
+        :param end:
+        :return:
+        '''
+        if end is None:
+            end = series.index[-1]
+        new_index = range(start, int(end+1))
+        series = series.reindex(pd.Index(new_index))
+        return series
+    VT_S1 = aws_b3_df["VT"].set_axis(aws_b3_df["breathTime"])
+    VT_S1i = aws_b3_df["VT"].set_axis(aws_b3_df["breathTime"].astype(int))
+    VT_S2 = live_b3_df["VT"].set_axis(live_b3_df["breathTime"].astype(int))
+
+
+    # corr, lags = cross_correlate(VT_S1, VT_S2)
+    # fig = plot_cross_corr(VT_S1, VT_S2, corr, lags, title = "Original S1", show = True)
     #
-    # VE_fig_dict = {
-    #     "Post Processing": (aws_b3_df, "breathTime", "VE"),
-    #     "Live": (live_b3_df, "breathTime", "VE"),
-    # }
-    #
-    # pl.create_subplots_w_raw(VE_fig_dict, raw_fig_dict,xtitle= "Time [s]", ytitle1= "VE", ytitle2="Raw Chest" ,show= True)
-    #
-    # VT_fig_dict = {
-    #     "Post Processing": (aws_b3_df, "breathTime", "VT"),
-    #     "Live": (live_b3_df, "breathTime", "VT"),
-    # }
-    # pl.create_subplots_w_raw(VT_fig_dict,raw_fig_dict, xtitle = "Time [s]", ytitle1= "VT", ytitle2= "Raw Chest", show = True)
-    if True:
+    # corr2, lags2 = cross_correlate(VT_S1i, VT_S2)
+    # fig = plot_cross_corr(VT_S1i, VT_S2, corr2, lags2, title="Int S1", show=True)
+
+    VT_df1 = pd.DataFrame(VT_S1i)
+    VT_df2 = pd.DataFrame(VT_S2)
+    VT_j = VT_df1.join(VT_df2, how = "outer", lsuffix="1", rsuffix= "2") #pd.merge(VT_S1i, VT_S2, how = "outer")
+
+    VT_j2 = VT_j.interpolate(method = "index").fillna(value = 0)
+    corr, lags = cross_correlate(VT_j2["VT1"], VT_j2["VT2"])
+    fig = plot_cross_corr(VT_j2["VT1"], VT_j2["VT2"], corr, lags, title="Interpolated", show=True)
+
+    time = pd.RangeIndex(start = 0, stop = max(VT_j2.index))
+    d = pd.DataFrame(np.arange(max(VT_j2.index)), index = np.arange(max(VT_j2.index)))
+    VT_j3 = VT_j2.join(d, how = "outer", lsuffix = "l", rsuffix = "r").interpolate(method = "index").fillna(value = 0)
+    corr, lags = cross_correlate(VT_j3["VT1"], VT_j3["VT2"])
+    fig = plot_cross_corr(VT_j3["VT1"], VT_j3["VT2"], corr, lags, title="Second by Second Interpolated", show=True)
+
+    opt_lag = lags[np.argmax(corr)]
+    VT_j4 = VT_j3
+    VT_j4["VT2"] = VT_j4["VT2"].shift(opt_lag)
+
+    corr, lags = cross_correlate(VT_j4["VT1"], VT_j4["VT2"])
+    fig = plot_cross_corr(VT_j4["VT1"], VT_j4["VT2"], corr, lags, title="Post Time shift", show=True)
+
+
+    # corr = scipy.signal.correlate(aws_b3_df["VT"].dropna(), live_b3_df["VT"].dropna())
+    # lags = scipy.signal.correlation_lags(len(aws_b3_df["VT"].dropna()), len(live_b3_df["VT"].dropna()))
+    # corr_df = pd.DataFrame(np.array([lags, corr/corr.max()]).T, columns =["lags", "cross-correlation"])
+    # fig = corr_df.plot(x = "lags", y = "cross-correlation")
+    # fig.show()
+
+    ## Compare
+    if False:
         figs = []
 
         raw_fig_dict = {
