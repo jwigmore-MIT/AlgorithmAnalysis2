@@ -96,6 +96,8 @@ def create_subplots(df_dicts, plottitle="", xtitles=[], ytitles=[], show=False):
     num_subplots = len(df_dicts)
     fig = make_subplots(rows = num_subplots, cols=1, shared_xaxes= True)
     fig.update_layout(title=plottitle)
+    # Show legent on all subplots
+    fig.update_layout(showlegend=True)
     for df_dict in df_dicts:
         n_row = df_dicts.index(df_dict) + 1
         for name, (df, xcol, ycol) in df_dict.items():
@@ -107,10 +109,19 @@ def create_subplots(df_dicts, plottitle="", xtitles=[], ytitles=[], show=False):
             fig = fig.add_trace(go.Scatter(
                 x= xvals,
                 y=df[ycol],
-                name=name
+                name=name,
+                legendgroup = n_row,
             ), row = n_row, col = 1)
         fig.update_yaxes(title_text = ytitles[df_dicts.index(df_dict)], row = n_row)
         fig.update_xaxes(title_text = xtitles[df_dicts.index(df_dict)], row = n_row)
+    # Increase figure size based on the number of subplots
+    fig.update_layout(height=500*num_subplots,
+                      legend_tracegroupgap=450,
+                      )
+
+
+    if show:
+        fig.show()
     return fig
 
 

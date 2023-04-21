@@ -7,11 +7,13 @@ from external.postprocessing.BR_rVE_RTformat import analyze_v2, read_chest_data,
 
 
 def BR_rVE_RTformat_wrapper(uncleaned_data_path):
+    # Write docstring
     """
     Using BR_rVE_RTformat, get chest_raw, chest_5hz, chest_bs, chest_bs_smooth, time
-    :param json_file_path:
-    :return: chest_raw, chest_5hz, chest_bs, chest_bs_smooth, time
+    :param uncleaned_data_path:
+    :return:
     """
+
     raw_data = get_raw_from_dir_path(uncleaned_data_path)
     chest_raw, fs, hw_v = read_chest_data(raw_data)
     time = np.array([t / fs / 60 for t in range(len(chest_raw))])  # [min]

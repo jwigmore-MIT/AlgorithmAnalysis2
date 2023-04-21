@@ -298,7 +298,7 @@ def analyze_v2(chest_raw, fs, hw_v, max_amp, baseline, fev1):
         elif minProm < 25:
             minProm = 25
         # Apply to full record
-        peaks, dic = find_peaks(chest_bs_smooth, prominence=minProm / 2, distance=fs / 1.5)
+        peaks, dic = find_peaks(chest_bs_smooth, prominence=minProm / 2, distance=fs / 1.5) # returns indices and properties on smoothed chest data
         valleys, dic_v = find_peaks(-chest_bs_smooth, prominence=minProm / 2, distance=fs / 1.5)
 
         #        # ========================
@@ -499,51 +499,53 @@ def analyze_v2(chest_raw, fs, hw_v, max_amp, baseline, fev1):
         X_bbyb[1:-1, 7] = np.round(in_ex, 3)
         X_bbyb[1:-1, 8] = np.round(in_ex_smooth, 3)
 
-    #        # ========================
-    #        fig, axs = plt.subplots(3, 1, figsize=(12,9), sharex=True)
-    #        fig.subplots_adjust(hspace=0.1)
-    #        plt.suptitle('%s' % (json_file),fontsize=14,y=0.97)
-    #        i = 0
-    #        axs[i].plot(time,chest_raw,'k-',linewidth=0.75,alpha=0.5)
-    #        axs[i].hold(True)
-    #        axs[i].plot(time[valley_peak_ALL[1:,0]],raw_valley,'r.',alpha=1)
-    #        axs[i].plot(time[valley_peak_ALL[1:,1]],raw_peak,'g.',alpha=1)
-    #        #axs[i].plot(time[valley_peak_ALL[1:,0]],chest_raw[valley_peak_ALL[1:,0]],'r.',alpha=0.75)
-    #        #axs[i].plot(time[valley_peak_ALL[1:,1]],chest_raw[valley_peak_ALL[1:,1]],'g.',alpha=0.75)
-    #        axs[i].legend(('signal','raw valley (avg.)','raw peak (avg.)'), loc='upper left',fontsize=10)
-    #        axs[i].set_ylabel('Raw Breathing Signal',fontsize=12)
-    #        axs[i].grid(True)
-    #        axs[i].set_xlim(0,time[-1])
-    #        #     i = i + 1
-    #        #     axs[i].plot(time,chest_bs,'b-',linewidth=1,alpha=0.75)
-    #        #     axs[i].hold(True)
-    #        #     axs[i].plot(time[valley_peak_ALL[1:,0]],chest_bs[valley_peak_ALL[1:,0]],'r.',alpha=1)
-    #        #     axs[i].plot(time[valley_peak_ALL[1:,1]],chest_bs[valley_peak_ALL[1:,1]],'g.',alpha=1)
-    #        #     axs[i].legend(('signal','filt valley','filt peak'), loc='upper left',fontsize=10)
-    #        #     axs[i].set_ylabel('BS Filterred Breathing Signal',fontsize=12)
-    #        #     axs[i].grid(True)
-    #        #     axs[i].set_xlim(0,time[-1])
-    #        i = i + 1
-    #        axs[i].plot(time,chest_bs_smooth,'b-',linewidth=1,alpha=0.75)
-    #        axs[i].hold(True)
-    #        axs[i].plot(time[valley_peak_ALL[1:,0]],chest_bs_smooth[valley_peak_ALL[1:,0]],'r.',alpha=1)
-    #        axs[i].plot(time[valley_peak_ALL[1:,1]],chest_bs_smooth[valley_peak_ALL[1:,1]],'g.',alpha=1)
-    #        axs[i].legend(('signal','smooth valley','smooth peak'), loc='upper left',fontsize=10)
-    #        axs[i].set_ylabel('BS Filterred + Smoothed Breathing Signal',fontsize=12)
-    #        axs[i].grid(True)
-    #        axs[i].set_xlim(0,time[-1])
-    #        i = i + 1
-    #        axs[i].plot(br_time,br,'m.',alpha=0.2)
-    #        axs[i].hold(True)
-    #        axs[i].plot(br_time,br_smooth,'m-',linewidth=1.5,alpha=1)
-    #        #axs[i].plot(time_imu,az,'g-',linewidth=1,alpha=0.75)
-    #        axs[i].set_ylabel('Breathing Rate',fontsize=12)
-    #        axs[i].legend(('inst.','smoothed'),fontsize=10,loc='upper left')
-    #        axs[i].grid(True)
-    #        axs[i].set_xlim(0,time[-1])
-    #        axs[i].set_xlabel('Time [$sec$]',fontsize=12)
-    #        plt.show()
-    #        # ========================
+        if True:
+            import matplotlib.pyplot as plt
+
+            fig, axs = plt.subplots(3, 1, figsize=(12,9), sharex=True)
+            fig.subplots_adjust(hspace=0.1)
+            #plt.suptitle('%s' % (json_file),fontsize=14,y=0.97)
+            i = 0
+            axs[i].plot(time,chest_raw,'k-',linewidth=0.75,alpha=0.5)
+            axs[i].hold(True)
+            axs[i].plot(time[valley_peak_ALL[1:,0]],raw_valley,'r.',alpha=1)
+            axs[i].plot(time[valley_peak_ALL[1:,1]],raw_peak,'g.',alpha=1)
+            #axs[i].plot(time[valley_peak_ALL[1:,0]],chest_raw[valley_peak_ALL[1:,0]],'r.',alpha=0.75)
+            #axs[i].plot(time[valley_peak_ALL[1:,1]],chest_raw[valley_peak_ALL[1:,1]],'g.',alpha=0.75)
+            axs[i].legend(('signal','raw valley (avg.)','raw peak (avg.)'), loc='upper left',fontsize=10)
+            axs[i].set_ylabel('Raw Breathing Signal',fontsize=12)
+            axs[i].grid(True)
+            axs[i].set_xlim(0,time[-1])
+            #     i = i + 1
+            #     axs[i].plot(time,chest_bs,'b-',linewidth=1,alpha=0.75)
+            #     axs[i].hold(True)
+            #     axs[i].plot(time[valley_peak_ALL[1:,0]],chest_bs[valley_peak_ALL[1:,0]],'r.',alpha=1)
+            #     axs[i].plot(time[valley_peak_ALL[1:,1]],chest_bs[valley_peak_ALL[1:,1]],'g.',alpha=1)
+            #     axs[i].legend(('signal','filt valley','filt peak'), loc='upper left',fontsize=10)
+            #     axs[i].set_ylabel('BS Filterred Breathing Signal',fontsize=12)
+            #     axs[i].grid(True)
+            #     axs[i].set_xlim(0,time[-1])
+            i = i + 1
+            axs[i].plot(time,chest_bs_smooth,'b-',linewidth=1,alpha=0.75)
+            axs[i].hold(True)
+            axs[i].plot(time[valley_peak_ALL[1:,0]],chest_bs_smooth[valley_peak_ALL[1:,0]],'r.',alpha=1)
+            axs[i].plot(time[valley_peak_ALL[1:,1]],chest_bs_smooth[valley_peak_ALL[1:,1]],'g.',alpha=1)
+            axs[i].legend(('signal','smooth valley','smooth peak'), loc='upper left',fontsize=10)
+            axs[i].set_ylabel('BS Filterred + Smoothed Breathing Signal',fontsize=12)
+            axs[i].grid(True)
+            axs[i].set_xlim(0,time[-1])
+            i = i + 1
+            axs[i].plot(br_time,br,'m.',alpha=0.2)
+            axs[i].hold(True)
+            axs[i].plot(br_time,br_smooth,'m-',linewidth=1.5,alpha=1)
+            #axs[i].plot(time_imu,az,'g-',linewidth=1,alpha=0.75)
+            axs[i].set_ylabel('Breathing Rate',fontsize=12)
+            axs[i].legend(('inst.','smoothed'),fontsize=10,loc='upper left')
+            axs[i].grid(True)
+            axs[i].set_xlim(0,time[-1])
+            axs[i].set_xlabel('Time [$sec$]',fontsize=12)
+            plt.show()
+
 
     return X_bbyb, ora_br, inst_rVT_raw, inst_rVE_raw, win_rVE_raw, internal_load, internal_load_signal, valley_peak_ALL, in_ex_ratio
 
