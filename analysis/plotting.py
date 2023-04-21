@@ -92,6 +92,27 @@ def create_subplots_w_raw(df_dict, raw_df_dict, plottitle="", xtitle="", ytitle1
         fig.show()
     return fig
 
+def create_subplots(df_dicts, plottitle="", xtitles=[], ytitles=[], show=False):
+    num_subplots = len(df_dicts)
+    fig = make_subplots(rows = num_subplots, cols=1, shared_xaxes= True)
+    fig.update_layout(title=plottitle)
+    for df_dict in df_dicts:
+        n_row = df_dicts.index(df_dict) + 1
+        for name, (df, xcol, ycol) in df_dict.items():
+            if xcol == "index":
+                xvals = df.index
+            else:
+                xvals = df[xcol]
+
+            fig = fig.add_trace(go.Scatter(
+                x= xvals,
+                y=df[ycol],
+                name=name
+            ), row = n_row, col = 1)
+        fig.update_yaxes(title_text = ytitles[df_dicts.index(df_dict)], row = n_row)
+        fig.update_xaxes(title_text = xtitles[df_dicts.index(df_dict)], row = n_row)
+    return fig
+
 
 
 def figures_to_html(figs, filename="dashboard.html", show=False):
