@@ -51,7 +51,7 @@ if __name__ == '__main__':
     ## Setup
     # activity_data_dir = "User_data/Arnar_Larusson_2023-04-12_easy_ride"
     # activity_data_dir = "User_data/Juan_2023-03-18_Testing_Live_VE_and_Garmin"
-    activity_data_dir = "data/Juan_2023-03-18_Testing_Live_VE_and_Garmin"
+    activity_data_dir = "../data/Juan_2023-03-18_Testing_Live_VE_and_Garmin"
     uncleaned_data_dir = os.path.join(activity_data_dir, "uncleaned_data")
     cleaned_data_dir = os.path.join(activity_data_dir, "cleaned_data")
     imp.clean_all_data(uncleaned_data_dir)
